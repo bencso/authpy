@@ -1,9 +1,6 @@
-from http.client import HTTPException
-from typing import Annotated
-from fastapi import FastAPI, Depends, APIRouter, status, Request, HTTPException
+from fastapi import FastAPI, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy.orm import Session
-from database import engine, Base, db_dependency
+from database import engine, Base
 from routers import users
 
 

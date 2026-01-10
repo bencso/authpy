@@ -1,9 +1,8 @@
 from typing import Annotated
 import segno
 import uuid
-from fastapi import APIRouter, Request, Depends, status, HTTPException
+from fastapi import APIRouter, Request, Depends
 from fastapi.templating import Jinja2Templates
-from fastapi.security import OAuth2PasswordBearer
 import bcrypt
 from middleware import auth_middleware
 
@@ -16,7 +15,9 @@ router = APIRouter(
     responses={404: {"description": "Nem található"}, 401: {"description": "Kérjük, jelentkezzen be a művelethez"}},
 )
 
-@router.post("/create-temporary-user", summary="Temporary QR kód létrehozás", description="Az admin felhasználó, létre tud hozni egy temporary qr kódot, amit ha beolvas majd a felhasználó, az átírányítja őt egy forms oldalra, ahol tud regisztrálni")
+@router.post("/create-temporary-user", 
+             summary="Temporary QR kód létrehozás", 
+             description="Az admin felhasználó, létre tud hozni egy temporary qr kódot, amit ha beolvas majd a felhasználó, az átírányítja őt egy forms oldalra, ahol tud regisztrálni")
 async def create_temporary_qr(request: Request, token: Annotated[str, Depends(auth_middleware)]):
     try:
         print(token)
@@ -33,12 +34,13 @@ async def create_temporary_qr(request: Request, token: Annotated[str, Depends(au
        }
 
     
-@router.post("/login", summary="Login")
+@router.post("/login", 
+             summary="Login")
 async def login(request: Request):
     try:
         body = await request.body()
         if(body is None):
-             raise ValueError("A bejelentkezés során hiba történt!")
+            raise ValueError("A bejelentkezés során hiba történt!")
         stringed_body = body.decode("utf-8")
         [_, b_uname, b_pass] = stringed_body.split('&')
         username = b_uname.split("=").pop(-1)
@@ -46,7 +48,6 @@ async def login(request: Request):
         if(len(username)<= 0 or len(password)<=0):
              raise ValueError("A felhasználónév és a jelszó kötelező!")
         hashed_password = bcrypt.hashpw(password,salt)
-        #TODO: Majd itt checkolni hogy tényleg létezik e ilyen user :) és ezalapján visszaadni
         return {
             "access_token": "FAF",
         }
