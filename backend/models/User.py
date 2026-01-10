@@ -1,4 +1,4 @@
-from db import Base
+from backend.database import Base
 from sqlalchemy import Column, Integer, String, TIMESTAMP, Boolean, text
 
 
