@@ -1,8 +1,7 @@
 from fastapi import FastAPI, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
 from database import engine, Base
-from routers import users
-
+from routers import auth
 
 app = FastAPI()
 Base.metadata.create_all(bind=engine)
@@ -22,12 +21,12 @@ app.add_middleware(
 
 apirouter = APIRouter(
     prefix="/api/v1",
-    responses={404: {"description": "Nem található"}, 401: {"description": "Kérjük, jelentkezzen be a művelethez"}},
+    responses={404: {"description": "Nem található"}, 401: {"description": "Kérjük, jelentkezzen be a művelethez"}, 200: {"description":"Sikeres művelet"}},
 )
     
 @apirouter.get("/test", tags=["Teszt"])
 def get_hello():
     return "TEST!"
 
-apirouter.include_router(users.router)
+apirouter.include_router(auth.router)
 app.include_router(apirouter)

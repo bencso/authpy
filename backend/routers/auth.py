@@ -2,17 +2,14 @@ from typing import Annotated
 import segno
 import uuid
 from fastapi import APIRouter, Request, Depends
-from fastapi.templating import Jinja2Templates
 import bcrypt
 from middleware import auth_middleware
-
-templates = Jinja2Templates(directory="html_templates")
-salt = bcrypt.gensalt()
+from dependecies import salt, templates
 
 router = APIRouter(
-    prefix="/users",
-    tags=["Users"],
-    responses={404: {"description": "Nem található"}, 401: {"description": "Kérjük, jelentkezzen be a művelethez"}},
+    prefix="/auth",
+    tags=["Authentikacio"],
+    responses={404: {"description": "Nem található"}, 401: {"description": "Kérjük, jelentkezzen be a művelethez"}, 200: {"description":"Sikeres művelet"}},
 )
 
 @router.post("/create-temporary-user", 

@@ -2,7 +2,7 @@ from typing import Annotated
 from fastapi import Depends, status, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 
-ouauth_security = OAuth2PasswordBearer(tokenUrl="api/v1/users/login")
+ouauth_security = OAuth2PasswordBearer(tokenUrl="api/v1/auth/login")
 
 def auth_middleware(token: Annotated[str, Depends(ouauth_security)]):
     if token == "undefined" or token is None:
