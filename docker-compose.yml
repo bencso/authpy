@@ -1,0 +1,53 @@
+version: '3.8'
+services:
+  api:
+    build: 
+      context: backend/
+    ports:
+      - "8001:8001"
+    volumes:
+      - ./backend:/app
+    command: "uvicorn main:app --host 0.0.0.0 --port 8001 --reload"
+    depends_on:
+      - postgres
+    restart: always
+    networks:
+      - app
+    container_name: api
+
+  ui:
+    build:
+      context: frontend/
+    ports:
+      - "8501:8501"
+    depends_on:
+      - api
+    volumes:
+      - ./frontend:/app
+    restart: always
+    networks:
+      - app
+    container_name: ui
+
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: homestant
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_HOST_AUTH_METHOD: trust
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: always
+    networks:
+      - app
+    container_name: postgres
+
+networks:
+  app:
+    driver: bridge
+
+volumes:
+  postgres_data:

@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+psycopg2-binary
+sqlalchemy
+python-dotenv
+pydantic
+sqlmodel
+segno
+jinja2
