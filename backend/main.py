@@ -1,15 +1,13 @@
 from typing import Annotated
-from fastapi import FastAPI, Depends, Request
-from fastapi.templating import Jinja2Templates
+from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
-from models import User
 from db import engine, SessionLocal, Base
-import segno
+from routers import users
+
 
 app = FastAPI()
 Base.metadata.create_all(bind=engine)
-templates = Jinja2Templates(directory="html_templates")
 
 def get_db():
     db = SessionLocal()
@@ -48,13 +46,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(users.router)
+
 @app.get("/")
 def get_hello():
     return "/docs"
-
-@app.get("/temporary-qr")
-async def createTemporayQr(request: Request):
-    qrcode = segno.make("http://localhost:8001/temporary-qr")
-    qrcode_svg = qrcode.svg_inline(scale=8, border=2)
-    return templates.TemplateResponse(
-        request=request, name='qrcode.html', context={"qrcode": qrcode_svg})

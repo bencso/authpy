@@ -7,3 +7,4 @@ pydantic
 sqlmodel
 segno
 jinja2
+bcrypt
