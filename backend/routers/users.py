@@ -4,7 +4,6 @@ import uuid
 from fastapi import APIRouter, Request, Depends
 from fastapi.templating import Jinja2Templates
 from fastapi.security import OAuth2PasswordBearer
-import json
 import bcrypt
 
 templates = Jinja2Templates(directory="html_templates")
@@ -40,6 +39,7 @@ async def check_token(request: Request):
         username = b_uname.split("=").pop(-1)
         password = b_pass.split("=").pop(-1).encode("utf-8")
         hashed_password = bcrypt.hashpw(password,salt)
+        #TODO: Majd itt checkolni hogy tényleg létezik e ilyen user :) és ezalapján visszaadni
         return "sikeres"
     except:
         print("HIBA!")

@@ -1,5 +1,5 @@
 from typing import Annotated
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from db import engine, SessionLocal, Base
@@ -46,8 +46,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(users.router)
 
-@app.get("/")
+
+apirouter = APIRouter(
+    prefix="/api/v1",
+    responses={404: {"description": "Not found"}},
+)
+
+@apirouter.get("/test", tags=["Teszt"])
 def get_hello():
-    return "/docs"
+    return "TEST!"
+
+apirouter.include_router(users.router)
+app.include_router(apirouter)
