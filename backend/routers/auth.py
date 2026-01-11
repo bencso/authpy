@@ -99,7 +99,8 @@ async def login(request: Request, response: Response, db: Annotated[object, Depe
             )
             return {
                 "message": "Sikeres bejelentkezés",
-                "response": response
+                "access_token": access_token,
+                "token_type": "bearer"
             }
         else:
             raise ValueError("A bejelentkezési adatok nem egyeznek!")
