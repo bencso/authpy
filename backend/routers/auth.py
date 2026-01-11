@@ -85,7 +85,11 @@ async def login(request: Request, response: Response, db: Annotated[object, Depe
 
         if password_hash.verify(password, search_user.password_hashed):
             token_data = {
-                "username": username
+                "username": username,
+                "user_id": search_user.id,
+                "sub": username,
+                "iat": datetime.now(timezone.utc),
+                "role": search_user.role if hasattr(search_user, 'role') else 'user'
             }
             access_token = create_access_token(
                 data=token_data, expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)

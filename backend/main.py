@@ -33,17 +33,26 @@ apirouter = APIRouter(
     },
 )
 
+
 async def create_admin_user_on_startup(db: Session):
     uuid = uuid4()
     hashed_password = password_hash.hash("Adminjelszó123")
     has_admin_user = db.query(User).filter(User.username == "admin").first()
-    if has_admin_user is None:
-        admin_user = User(id=1,qrcode=uuid, username="admin", password_hashed=hashed_password, created_at=datetime.now())
+    if has_admin_user is not None:
+        raise ValueError("Van már ilyen admin felhasználó")
+    else:
+        admin_user = User(
+            qrcode=uuid,
+            username="admin",
+            password_hashed=hashed_password,
+            created_at=datetime.now(),
+            role="admin",
+        )
         db.add(admin_user)
         db.commit()
         db.refresh(admin_user)
         return admin_user
-    return False
+
 
 @app.on_event("startup")
 async def startup():
@@ -52,14 +61,17 @@ async def startup():
         await create_admin_user_on_startup(db)
     finally:
         db.close()
-        
+    yield
+
+
 @apirouter.post("/create-admin", tags=["Teszt"])
 async def add_admin_user(db: Session = Depends(get_db)):
     try:
         await create_admin_user_on_startup(db=db)
         return {"message": "Sikeres admin létrehozás"}
-    except:
-        return {"message": "Hiba történt létrehozás közben"}
+    except Exception as e:
+        return {"message": str(e)}
+
 
 @apirouter.delete("/delete-admin", tags=["Teszt"])
 async def delete_admin_user(db: Session = Depends(get_db)):

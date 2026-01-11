@@ -9,6 +9,7 @@ load_dotenv()
 engine = create_engine(os.environ.get("postgres_url"))
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
+Base.metadata.drop_all(bind=engine)
 Base.metadata.create_all(bind=engine)
 
 
