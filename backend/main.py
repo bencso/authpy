@@ -57,9 +57,9 @@ async def startup():
 async def add_admin_user(db: Session = Depends(get_db)):
     try:
         await create_admin_user_on_startup(db=db)
-        return "Sikeres admin létrehozás"
+        return {"message": "Sikeres admin létrehozás"}
     except:
-        return "Hiba történt létrehozás közben"
+        return {"message": "Hiba történt létrehozás közben"}
 
 @apirouter.delete("/delete-admin", tags=["Teszt"])
 async def delete_admin_user(db: Session = Depends(get_db)):
