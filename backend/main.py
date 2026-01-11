@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from database import engine, Base, get_db
 from models.User import User
 from routers import auth
-from dependecies import password_hash 
+from dependecies import password_hash
 from uuid import uuid4
 from datetime import datetime
 
@@ -43,15 +43,31 @@ async def add_admin_user(db: Session = Depends(get_db)):
         db.add(admin_user)
         db.commit()
         db.refresh(admin_user)
-        print("Nincs")
         return admin_user
-    print("Van")
     return False
 
 
 @apirouter.get("/test", tags=["Teszt"])
 def get_hello():
     return "TEST!"
+
+@app.on_event("startup")
+async def startup():
+    db = next(get_db())
+    try:
+        await add_admin_user(db)
+    finally:
+        db.close()
+
+
+@apirouter.delete("/delete-admin", tags=["Teszt"])
+async def delete_admin_user(db: Session = Depends(get_db)):
+    admin_user = db.query(User).filter(User.username == "admin").first()
+    if admin_user:
+        db.delete(admin_user)
+        db.commit()
+        return {"message": "Admin felhasználó törölve"}
+    return {"message": "Nincs admin felhasználó"}
 
 
 apirouter.include_router(auth.router)
