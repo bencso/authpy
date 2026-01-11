@@ -2,12 +2,15 @@ from datetime import datetime, timedelta, timezone
 from typing import Annotated
 import segno
 import uuid
+import urllib.parse
 from fastapi import APIRouter, Request, Depends
 from middleware import auth_middleware
 from database import get_db
 from models.User import User
 import os
+from dependecies import password_hash 
 import jwt
+import bcrypt
 from dependecies import templates
 
 ALGORITHM = "HS256"
@@ -67,22 +70,31 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
 async def login(request: Request, db: Annotated[object, Depends(get_db)]):
     try:
         body = await request.body()
-        if body is None:
+        if not body:
             raise ValueError("A bejelentkezés során hiba történt!")
         stringed_body = body.decode("utf-8")
-        [_, b_uname, b_pass] = stringed_body.split("&")
-        username = b_uname.split("=").pop(-1)
-        password = b_pass.split("=").pop(-1).encode("utf-8")
-        if len(username) <= 0 or len(password) <= 0:
+        
+        form_data = urllib.parse.parse_qs(stringed_body)
+        username = form_data.get("username", [""])[0]
+        password = form_data.get("password", [""])[0]
+        
+        if not username or not password:
             raise ValueError("A felhasználónév és a jelszó kötelező!")
+        
         search_user = db.query(User).filter(User.username == username).first()
         if not search_user:
             raise ValueError("A felhasználó nem található!")
-        if password_hash.verify(password, search_user.password_hashed.encode('utf-8')):
+        
+        print(search_user.password_hashed)
+        print(password_hash.hash(password))
+        if password_hash.verify(password, search_user.password_hashed):
+            print("User")
+            token_data = {
+                "username": username
+            }
             access_token = create_access_token(
-                data={username: username}, expires_delta=ACCESS_TOKEN_EXPIRE_MINUTES
+                data=token_data, expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
             )
-            print(access_token)
             return {
                 "access_token": access_token,
             }

@@ -8,5 +8,5 @@ sqlmodel
 segno
 jinja2
 bcrypt
-pwdlib
+pwdlib[argon2]
 jwt

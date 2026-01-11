@@ -1,12 +1,12 @@
-from fastapi import FastAPI, APIRouter
+from fastapi import FastAPI, APIRouter, Depends
 from fastapi.middleware.cors import CORSMiddleware
-from database import engine, Base
+from sqlalchemy.orm import Session
+from database import engine, Base, get_db
 from models.User import User
 from routers import auth
-from dependecies import password_hash
+from dependecies import password_hash 
 from uuid import uuid4
 from datetime import datetime
-from database import SessionLocal
 
 app = FastAPI()
 Base.metadata.create_all(bind=engine)
@@ -33,29 +33,20 @@ apirouter = APIRouter(
     },
 )
 
-@app.on_event("startup")
-async def create_admin_on_startup():
-    db = SessionLocal()
-    try:
-        uuid = uuid4()
-        password_hashed = password_hash.hash("Adminjelszó123".encode("utf-8"))
-        has_admin_user = db.query(User).filter(User.username == "admin").first()
-        if has_admin_user is None:
-            admin_user = User(
-                id=1,
-                qrcode=uuid,
-                username="admin",
-                password_hashed=password_hashed,
-                created_at=datetime.now(),
-            )
-            db.add(admin_user)
-            db.commit()
-            db.refresh(admin_user)
-            print("Admin felhasználó létrehozva")
-        else:
-            print("Admin felhasználó már létezik")
-    finally:
-        db.close()
+@apirouter.post("/create-admin", tags=["Teszt"])
+async def add_admin_user(db: Session = Depends(get_db)):
+    uuid = uuid4()
+    hashed_password = password_hash.hash("Adminjelszó123")
+    has_admin_user = db.query(User).filter(User.username == "admin").first()
+    if has_admin_user is None:
+        admin_user = User(id=1,qrcode=uuid, username="admin", password_hashed=hashed_password, created_at=datetime.now())
+        db.add(admin_user)
+        db.commit()
+        db.refresh(admin_user)
+        print("Nincs")
+        return admin_user
+    print("Van")
+    return False
 
 
 @apirouter.get("/test", tags=["Teszt"])
