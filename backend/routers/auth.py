@@ -112,16 +112,16 @@ async def login(
     response_model=dict,
 )
 async def create_user(
-    username: Annotated[str, Form()],
-    password: Annotated[str, Form()],
     user: Annotated[Union[HTTPException, str], Depends(auth_middleware_admin)],
+    username: Annotated[str, Form()],
     db: Annotated[object, Depends(get_db)],
     response: Response,
+    password: Annotated[str, Form()] = None,
 ):
-
-    randompass = await get_random_password()
+    _password = password or  await get_random_password()
+    # Logika beépítése, SMTP (smtplib-bel), amivel ki küldjük a dolgokat
     
-    return {"password": randompass}
+    return {"password": _password}
 
 
 @router.get("/me", summary="Jelenlegi felhasználó adatai")
