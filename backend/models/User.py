@@ -9,4 +9,4 @@ class User(Base):
     username = Column(String, nullable=True)
     password_hashed = Column(String, nullable=True)
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
-    role= Column(String, nullable=False, default="user")
+    role= Column(Integer, nullable=False, default=0)

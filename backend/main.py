@@ -8,7 +8,14 @@ from dependecies import password_hash
 from uuid import uuid4
 from datetime import datetime
 
-app = FastAPI()
+app = FastAPI(
+    title="Homestant API",
+    description="API dokumentáció a Homestant alkalmazáshoz",
+    version="1.0.0",
+    swagger_ui_parameters={
+        "persistAuthorization": True,
+    },
+)
 Base.metadata.create_all(bind=engine)
 
 origins = [
@@ -34,19 +41,22 @@ apirouter = APIRouter(
 )
 
 
+ADMIN_USERNAME = "admin"
+
+
 async def create_admin_user_on_startup(db: Session):
     uuid = uuid4()
     hashed_password = password_hash.hash("Adminjelszó123")
-    has_admin_user = db.query(User).filter(User.username == "admin").first()
+    has_admin_user = db.query(User).filter(User.username == ADMIN_USERNAME).first()
     if has_admin_user is not None:
         raise ValueError("Van már ilyen admin felhasználó")
     else:
         admin_user = User(
             qrcode=uuid,
-            username="admin",
+            username=ADMIN_USERNAME,
             password_hashed=hashed_password,
             created_at=datetime.now(),
-            role="admin",
+            role=1,
         )
         db.add(admin_user)
         db.commit()

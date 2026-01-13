@@ -9,4 +9,5 @@ segno
 jinja2
 bcrypt
 pwdlib[argon2]
-jwt
+PyJWT
+python-multipart
