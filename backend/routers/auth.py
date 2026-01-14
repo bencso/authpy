@@ -120,7 +120,9 @@ async def create_user(
     response: Response,
     password: Annotated[str, Form()] = None,
 ):
-    has_this_username_in_db = db.query(User).filter(func.lower(User.username) == func.lower(username)).first()
+    has_this_username_in_db = (
+        db.query(User).filter(func.lower(User.username) == func.lower(username)).first()
+    )
     if has_this_username_in_db:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -129,7 +131,6 @@ async def create_user(
     uuid = uuid4()
     _password = password or await get_random_password()
     hashed_password = password_hash.hash(_password)
-    # Logika beépítése, SMTP (smtplib-bel), amivel ki küldjük a dolgokat
     qrcode_data = {
         "sub": str(uuid),
         "username": username,
@@ -155,7 +156,6 @@ async def create_user(
 async def get_me(current_user: Annotated[User, Depends(get_current_user)]):
     return {
         "username": current_user.username,
-        "email": current_user.email,
         "user_id": current_user.id,
         "role": current_user.role,
         "created_at": current_user.created_at,
