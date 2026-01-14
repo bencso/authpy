@@ -157,6 +157,7 @@ async def get_me(current_user: Annotated[User, Depends(get_current_user)]):
     return {
         "username": current_user.username,
         "user_id": current_user.id,
+        "qrcode": current_user.qrcode,
         "role": current_user.role,
         "created_at": current_user.created_at,
     }
