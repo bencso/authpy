@@ -4,7 +4,7 @@ from sqlalchemy import Column, Integer, String, TIMESTAMP, text
 class User(Base):
     __tablename__="users"
     
-    id = Column(Integer,primary_key=True,nullable=False)
+    id = Column(Integer,primary_key=True,nullable=False, autoincrement=True)
     qrcode = Column(String, nullable=True, default="ideinglenes_temp")
     username = Column(String, nullable=True)
     password_hashed = Column(String, nullable=True)

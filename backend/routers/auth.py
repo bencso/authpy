@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta, timezone
 from typing import Annotated, Union
+from uuid import uuid4
 from fastapi import APIRouter, Depends, Response, HTTPException, status, Form
 from fastapi.security import (
     HTTPBearer,
@@ -14,6 +15,7 @@ import jwt
 from functions.auth.get_current_user import get_current_user
 from middleware import auth_middleware_admin
 from functions.auth.randompassword import get_random_password
+from sqlalchemy import func
 
 security = HTTPBearer()
 
@@ -118,10 +120,35 @@ async def create_user(
     response: Response,
     password: Annotated[str, Form()] = None,
 ):
-    _password = password or  await get_random_password()
+    has_this_username_in_db = db.query(User).filter(func.lower(User.username) == func.lower(username)).first()
+    if has_this_username_in_db:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Van már ilyen felhasználónévvel rendelkező felhasználó",
+        )
+    uuid = uuid4()
+    _password = password or await get_random_password()
+    hashed_password = password_hash.hash(_password)
     # Logika beépítése, SMTP (smtplib-bel), amivel ki küldjük a dolgokat
-    
-    return {"password": _password}
+    qrcode_data = {
+        "sub": str(uuid),
+        "username": username,
+        "password": hashed_password,
+        "iat": datetime.now(timezone.utc),
+    }
+    qrcode = jwt.encode(qrcode_data, os.getenv("QRCODE_KEY"), algorithm=ALGORITHM)
+
+    new_user = User(
+        qrcode=qrcode, username=username, password_hashed=hashed_password, role=0
+    )
+
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+
+    return {
+        "message": "Sikeres felhasználó létrehozás: " + new_user.username,
+    }
 
 
 @router.get("/me", summary="Jelenlegi felhasználó adatai")
