@@ -9,8 +9,8 @@ from uuid import uuid4
 from datetime import datetime
 
 app = FastAPI(
-    title="Homestant API",
-    description="API dokumentáció a Homestant alkalmazáshoz",
+    title="AUTHPY",
+    description="API dokumentáció",
     version="1.0.0",
     swagger_ui_parameters={
         "persistAuthorization": True,
